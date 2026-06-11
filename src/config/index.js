@@ -3,13 +3,13 @@
 require('dotenv').config();
 const fs = require('fs');
 
-const IS_VERCEL = process.env.VERCEL === '1';
-const AUDIO_DIR = IS_VERCEL ? '/tmp/uploads' : 'uploads';
+const IS_VERCEL    = process.env.VERCEL === '1';
+const AUDIO_DIR    = IS_VERCEL ? '/tmp/uploads'          : 'uploads';
+const SESSIONS_DIR = IS_VERCEL ? '/tmp/uploads/sessions' : 'uploads/sessions';
 
-// Ensure the audio upload directory exists at startup
-if (!fs.existsSync(AUDIO_DIR)) {
-  fs.mkdirSync(AUDIO_DIR, { recursive: true });
-}
+// Ensure upload directories exist at startup
+if (!fs.existsSync(AUDIO_DIR))    fs.mkdirSync(AUDIO_DIR,    { recursive: true });
+if (!fs.existsSync(SESSIONS_DIR)) fs.mkdirSync(SESSIONS_DIR, { recursive: true });
 
 const CONFIG = {
   port: process.env.PORT || 3001,
@@ -36,4 +36,4 @@ const CONFIG = {
   },
 };
 
-module.exports = { CONFIG, IS_VERCEL, AUDIO_DIR };
+module.exports = { CONFIG, IS_VERCEL, AUDIO_DIR, SESSIONS_DIR };

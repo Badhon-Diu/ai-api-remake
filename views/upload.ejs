@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="theme-color" content="#6366f1">
+  <title>DIU IntelliMarks — Upload</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --indigo:   #6366f1;
+      --indigo-d: #4f46e5;
+      --green:    #10b981;
+      --green-d:  #059669;
+      --red:      #ef4444;
+      --red-d:    #dc2626;
+      --bg:       #f8fafc;
+      --card:     #ffffff;
+      --border:   #e2e8f0;
+      --text:     #0f172a;
+      --muted:    #64748b;
+      --r:        14px;
+    }
+
+    html, body {
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Header ── */
+    .header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .logo {
+      width: 38px; height: 38px;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+    .header-text h1 { font-size: 16px; font-weight: 700; }
+    .header-text p  { font-size: 11px; color: var(--muted); font-family: monospace; margin-top: 1px; }
+
+    /* ── Container ── */
+    .container { padding: 20px 16px 40px; max-width: 520px; margin: 0 auto; }
+
+    /* ── Instruction ── */
+    .hint-box {
+      background: linear-gradient(135deg, rgba(99,102,241,.08), rgba(139,92,246,.08));
+      border: 1px solid rgba(99,102,241,.2);
+      border-radius: var(--r);
+      padding: 14px 16px;
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+
+    /* ── Action buttons ── */
+    .action-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .action-btn {
+      background: var(--card);
+      border: 1.5px dashed var(--border);
+      border-radius: var(--r);
+      padding: 22px 12px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      transition: border-color .15s, background .15s, transform .1s;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+    .action-btn:active { transform: scale(.97); }
+    .action-btn.camera-btn:hover, .action-btn.camera-btn:focus { border-color: var(--indigo); background: rgba(99,102,241,.04); }
+    .action-btn.gallery-btn:hover, .action-btn.gallery-btn:focus { border-color: var(--green); background: rgba(16,185,129,.04); }
+    .action-btn .icon { font-size: 28px; line-height: 1; }
+    .action-btn .label { font-size: 13px; font-weight: 600; color: var(--muted); }
+    .action-btn:focus { outline: 2px solid var(--indigo); outline-offset: 2px; }
+
+    /* ── Image grid ── */
+    .grid-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    .grid-count { font-size: 13px; font-weight: 600; color: var(--muted); }
+    .clear-btn {
+      background: none; border: none; cursor: pointer;
+      font-size: 12px; color: var(--red); padding: 4px 8px;
+      border-radius: 6px; transition: background .15s;
+    }
+    .clear-btn:hover { background: rgba(239,68,68,.08); }
+
+    .image-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .grid-item {
+      position: relative;
+      aspect-ratio: 1;
+      border-radius: 10px;
+      overflow: hidden;
+      background: var(--border);
+      box-shadow: 0 1px 4px rgba(0,0,0,.08);
+    }
+    .grid-item img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .remove-img {
+      position: absolute;
+      top: 4px; right: 4px;
+      width: 22px; height: 22px;
+      background: rgba(0,0,0,.55);
+      border: none; border-radius: 50%;
+      color: #fff; font-size: 13px; line-height: 1;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: background .15s;
+    }
+    .remove-img:hover { background: var(--red); }
+
+    /* ── Submit button ── */
+    .submit-btn {
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      color: #fff;
+      border: none;
+      border-radius: var(--r);
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(99,102,241,.35);
+      transition: opacity .15s, transform .1s, box-shadow .15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .submit-btn:disabled {
+      opacity: .45;
+      cursor: not-allowed;
+      box-shadow: none;
+      transform: none;
+    }
+    .submit-btn:not(:disabled):hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(99,102,241,.45);
+    }
+    .submit-btn:not(:disabled):active { transform: scale(.98); }
+
+    /* ── Progress bar ── */
+    .progress-wrap {
+      width: 100%;
+      height: 6px;
+      background: var(--border);
+      border-radius: 3px;
+      margin-top: 14px;
+      overflow: hidden;
+      display: none;
+    }
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #6366f1, #8b5cf6);
+      border-radius: 3px;
+      width: 0%;
+      transition: width .3s ease;
+    }
+
+    /* ── Status messages ── */
+    .status {
+      margin-top: 16px;
+      padding: 13px 16px;
+      border-radius: var(--r);
+      font-size: 14px;
+      font-weight: 500;
+      line-height: 1.5;
+      display: none;
+      animation: fadeIn .2s ease;
+    }
+    .status.success { display: block; background: rgba(16,185,129,.1); border: 1px solid rgba(16,185,129,.3); color: #065f46; }
+    .status.error   { display: block; background: rgba(239,68,68,.1);  border: 1px solid rgba(239,68,68,.3);  color: #991b1b; }
+    .status.info    { display: block; background: rgba(99,102,241,.08); border: 1px solid rgba(99,102,241,.2); color: #3730a3; }
+
+    /* ── Upload summary card (shown after successful upload) ── */
+    .summary-card {
+      background: var(--card);
+      border: 1px solid rgba(16,185,129,.3);
+      border-radius: var(--r);
+      padding: 18px;
+      margin-top: 16px;
+      text-align: center;
+      display: none;
+    }
+    .summary-card .big-num {
+      font-size: 42px; font-weight: 800;
+      background: linear-gradient(135deg, #10b981, #059669);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+    .summary-card p { font-size: 13px; color: var(--muted); }
+    .summary-card .add-more {
+      margin-top: 14px;
+      background: none;
+      border: 1.5px dashed var(--border);
+      border-radius: 10px;
+      padding: 10px 20px;
+      font-size: 13px; font-weight: 600;
+      color: var(--indigo); cursor: pointer;
+      transition: border-color .15s, background .15s;
+      width: 100%;
+    }
+    .summary-card .add-more:hover { border-color: var(--indigo); background: rgba(99,102,241,.05); }
+
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* spinner inside button */
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .btn-spinner {
+      width: 18px; height: 18px;
+      border: 2.5px solid rgba(255,255,255,.4);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin .8s linear infinite;
+      flex-shrink: 0;
+    }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">📚</div>
+  <div class="header-text">
+    <h1>DIU IntelliMarks</h1>
+    <p>Session: <%= uuid %></p>
+  </div>
+</div>
+
+<div class="container">
+
+  <div class="hint-box">
+    Capture or select the mark sheet photos one by one. Once you're happy with the list, hit <strong>Submit</strong> to send them to the desktop extension.
+  </div>
+
+  <!-- Action buttons -->
+  <div class="action-row">
+    <button class="action-btn camera-btn" id="cameraBtn" type="button">
+      <span class="icon">📷</span>
+      <span class="label">Take Photo</span>
+    </button>
+    <button class="action-btn gallery-btn" id="galleryBtn" type="button">
+      <span class="icon">🖼️</span>
+      <span class="label">From Gallery</span>
+    </button>
+  </div>
+
+  <!-- Hidden inputs -->
+  <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none">
+  <input type="file" id="galleryInput" accept="image/*" multiple style="display:none">
+
+  <!-- Image grid (shown once images are added) -->
+  <div id="gridSection" style="display:none">
+    <div class="grid-header">
+      <span class="grid-count" id="gridCount">0 photos ready</span>
+      <button class="clear-btn" id="clearAllBtn" type="button">Clear all</button>
+    </div>
+    <div class="image-grid" id="imageGrid"></div>
+  </div>
+
+  <!-- Submit -->
+  <button class="submit-btn" id="submitBtn" disabled type="button">
+    Submit Photos
+  </button>
+
+  <!-- Progress -->
+  <div class="progress-wrap" id="progressWrap">
+    <div class="progress-bar" id="progressBar"></div>
+  </div>
+
+  <!-- Status -->
+  <div class="status" id="statusMsg"></div>
+
+  <!-- Upload summary -->
+  <div class="summary-card" id="summaryCard">
+    <div class="big-num" id="totalCount">0</div>
+    <p>images uploaded to the extension</p>
+    <p style="margin-top:6px;font-size:12px;">You can now refresh the count in the extension and click <strong>Process</strong>.</p>
+    <button class="add-more" id="addMoreBtn" type="button">+ Add more photos</button>
+  </div>
+
+</div>
+
+<script>
+  'use strict';
+
+  const UUID      = '<%= uuid %>';
+  const UPLOAD_URL = `/upload/${UUID}/images`;
+
+  let pending   = []; // {file, preview} — not yet submitted
+  let totalUploaded = 0;
+
+  // ── DOM refs ────────────────────────────────────────────────────────────────
+  const cameraBtn   = document.getElementById('cameraBtn');
+  const galleryBtn  = document.getElementById('galleryBtn');
+  const cameraInput = document.getElementById('cameraInput');
+  const galleryInput= document.getElementById('galleryInput');
+  const gridSection = document.getElementById('gridSection');
+  const imageGrid   = document.getElementById('imageGrid');
+  const gridCount   = document.getElementById('gridCount');
+  const clearAllBtn = document.getElementById('clearAllBtn');
+  const submitBtn   = document.getElementById('submitBtn');
+  const progressWrap= document.getElementById('progressWrap');
+  const progressBar = document.getElementById('progressBar');
+  const statusMsg   = document.getElementById('statusMsg');
+  const summaryCard = document.getElementById('summaryCard');
+  const totalCountEl= document.getElementById('totalCount');
+  const addMoreBtn  = document.getElementById('addMoreBtn');
+
+  // ── Events ──────────────────────────────────────────────────────────────────
+  cameraBtn.addEventListener('click',  () => cameraInput.click());
+  galleryBtn.addEventListener('click', () => galleryInput.click());
+  cameraInput.addEventListener('change',  e => handleFiles(e.target.files));
+  galleryInput.addEventListener('change', e => handleFiles(e.target.files));
+  clearAllBtn.addEventListener('click', clearAll);
+  submitBtn.addEventListener('click',   uploadAll);
+  addMoreBtn.addEventListener('click',  showUploadUI);
+
+  // ── File handling ────────────────────────────────────────────────────────────
+  function handleFiles(fileList) {
+    Array.from(fileList).forEach(file => {
+      if (!file.type.startsWith('image/')) return;
+      const reader = new FileReader();
+      reader.onload = e => {
+        pending.push({ file, preview: e.target.result });
+        renderGrid();
+      };
+      reader.readAsDataURL(file);
+    });
+    // Reset input so the same file can be re-selected
+    cameraInput.value  = '';
+    galleryInput.value = '';
+  }
+
+  function renderGrid() {
+    gridSection.style.display = pending.length ? 'block' : 'none';
+    gridCount.textContent = `${pending.length} photo${pending.length !== 1 ? 's' : ''} ready`;
+    submitBtn.disabled    = pending.length === 0;
+
+    imageGrid.innerHTML = pending.map((item, i) => `
+      <div class="grid-item">
+        <img src="${item.preview}" alt="Photo ${i + 1}" loading="lazy">
+        <button class="remove-img" data-idx="${i}" type="button" aria-label="Remove">✕</button>
+      </div>
+    `).join('');
+
+    imageGrid.querySelectorAll('.remove-img').forEach(btn => {
+      btn.addEventListener('click', () => {
+        pending.splice(Number(btn.dataset.idx), 1);
+        renderGrid();
+      });
+    });
+  }
+
+  function clearAll() {
+    pending = [];
+    renderGrid();
+    hideStatus();
+  }
+
+  // ── Upload ───────────────────────────────────────────────────────────────────
+  async function uploadAll() {
+    if (pending.length === 0) return;
+
+    submitBtn.disabled   = true;
+    submitBtn.innerHTML  = '<div class="btn-spinner"></div> Uploading…';
+    progressWrap.style.display = 'block';
+    progressBar.style.width    = '10%';
+    hideStatus();
+
+    const formData = new FormData();
+    pending.forEach((item, i) => {
+      const ext  = item.file.type.split('/')[1] || 'jpg';
+      formData.append('images', item.file, `photo-${i + 1}.${ext}`);
+    });
+
+    try {
+      progressBar.style.width = '40%';
+
+      const resp = await fetch(UPLOAD_URL, { method: 'POST', body: formData });
+      progressBar.style.width = '90%';
+
+      const data = await resp.json();
+      if (!resp.ok) throw new Error(data.error || 'Upload failed');
+
+      progressBar.style.width = '100%';
+
+      totalUploaded = data.total;
+      pending = [];
+      renderGrid();
+
+      // Show summary card
+      totalCountEl.textContent = totalUploaded;
+      summaryCard.style.display = 'block';
+      showStatus(`✓ ${data.uploaded} photo${data.uploaded !== 1 ? 's' : ''} uploaded! Total in session: ${data.total}`, 'success');
+
+    } catch (err) {
+      showStatus('Upload failed: ' + err.message, 'error');
+      submitBtn.disabled  = false;
+      submitBtn.innerHTML = 'Submit Photos';
+    } finally {
+      setTimeout(() => { progressWrap.style.display = 'none'; progressBar.style.width = '0%'; }, 600);
+    }
+  }
+
+  // ── UI helpers ───────────────────────────────────────────────────────────────
+  function showUploadUI() {
+    summaryCard.style.display = 'none';
+    submitBtn.innerHTML = 'Submit Photos';
+    submitBtn.disabled  = true;
+    renderGrid();
+  }
+
+  function showStatus(msg, type) {
+    statusMsg.textContent  = msg;
+    statusMsg.className    = `status ${type}`;
+  }
+
+  function hideStatus() {
+    statusMsg.className = 'status';
+  }
+</script>
+</body>
+</html>
