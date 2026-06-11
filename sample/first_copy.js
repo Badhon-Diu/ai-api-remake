@@ -49,9 +49,9 @@ const CONFIG = {
 
   // Timeout limits for each external AI service (milliseconds)
   timeouts: {
-    whisper  : 30_000,   // 30s — audio transcription can be slow
-    deepSeek : 35_000,   // 35s — increased from 20s; V4-Flash may think before answering
-    vision   : 40_000,   // 40s — vision model needs time for image analysis
+    whisper  : 180_000,   // 30s — audio transcription can be slow
+    deepSeek : 180_000,   // 35s — increased from 20s; V4-Flash may think before answering
+    vision   : 180_000,   // 40s — vision model needs time for image analysis
   },
 };
 
